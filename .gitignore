@@ -1,0 +1,16 @@
+# Local config (may contain your machine paths and DB location)
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+.eggs/
+
+# Output dirs (optional; remove if you want to commit generated graphics/docs)
+# scenario_graphics/
+# docs/

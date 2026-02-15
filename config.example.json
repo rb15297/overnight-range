@@ -1,0 +1,11 @@
+{
+  "database": {
+    "path": "sqlite:///C:/path/to/your/trading.db",
+    "comment": "Path to SQLite database containing raw_bars_1min table. Update this to point to your database."
+  },
+  "output": {
+    "scenario_graphics_dir": "./scenario_graphics",
+    "docs_dir": "./docs",
+    "comment": "Output directories for generated graphics and documentation"
+  }
+}
