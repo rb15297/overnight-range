@@ -263,25 +263,15 @@ def main():
     if args.scenarios:
         scenario_filter = set(int(s.strip()) for s in args.scenarios.split(','))
     
-    # Setup output directories
+    # Setup output directories (do not clear existing files; we only overwrite files we generate)
     base_dir = Path(__file__).parent.parent / "scenario_graphics"
     base_dir.mkdir(exist_ok=True)
-    
-    # Clear existing graphics in scenario folders
     scenario_dirs = {}
     for i in range(1, 18):
         scenario_dir = base_dir / f"scenario_{i}"
-        
-        # Remove existing PNG files in this scenario folder
-        if scenario_dir.exists():
-            for png_file in scenario_dir.glob("*.png"):
-                png_file.unlink()
-                
         scenario_dir.mkdir(exist_ok=True)
         scenario_dirs[i] = scenario_dir
-    
-    print(f"Cleared existing graphics from scenario folders")
-    
+
     print(f"Generating graphics for {args.symbol} from {start_date} to {end_date}")
     if scenario_filter:
         print(f"Filtering to scenarios: {sorted(scenario_filter)}")
@@ -343,7 +333,15 @@ def main():
             if not bars_06_1130:
                 print(f"  Skipping {session_date}: no bars")
                 continue
-            
+
+            # Only delete the single day's file we are about to regenerate (if we can identify it)
+            output_dir = scenario_dirs[scenario]
+            if session_date is not None:
+                day_filename = f"{session_date}_scenario_{scenario}.png"
+                day_filepath = output_dir / day_filename
+                if day_filepath.exists():
+                    day_filepath.unlink()
+
             # Generate graphic
             output_path = generate_day_graphic(
                 session_date=session_date,

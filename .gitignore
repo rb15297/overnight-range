@@ -11,6 +11,5 @@ venv/
 *.egg-info/
 .eggs/
 
-# Output dirs (optional; remove if you want to commit generated graphics/docs)
-# scenario_graphics/
-# docs/
+# Generated output (large; regenerate with generate_scenario_graphics)
+scenario_graphics/
