@@ -26,6 +26,9 @@ from src.overnight_range_service import (
     CONFIG_PATH,
 )
 
+# Folder under repo root for scenario summary CSV files (created on first run)
+SCENARIO_SUMMARY_DIR = Path(__file__).resolve().parent.parent / "scenario_summary"
+
 # 06:00–09:00 ET and 09:00–16:00 ET on session_date
 def _day_session_windows(session_date: date):
     start_06_et = datetime(session_date.year, session_date.month, session_date.day, 6, 0, 0, tzinfo=ET)
@@ -298,6 +301,11 @@ def main():
     parser.add_argument("--end", help="Range end (YYYY-MM-DD), use with --start")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="Path to config.json")
     parser.add_argument("--db", help="Override database path")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        help="Override path for scenario summary CSV (default: scenario_summary/<symbol>_<start>_<end>.csv)",
+    )
     args = parser.parse_args()
 
     def parse_date(s: str) -> date:
@@ -324,6 +332,92 @@ def main():
     SCENARIOS = tuple(range(1, 18))
     BULL_SCENARIOS = (1, 2, 3, 7, 8, 9, 10, 11)
     BEAR_SCENARIOS = (4, 5, 6, 12, 13, 14, 15, 16)
+
+    # Write summary CSV on every run (default: scenario_summary/<symbol>_<start>_<end>.csv)
+    import csv
+
+    out_path = args.out
+    if out_path is None:
+        SCENARIO_SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
+        end_str = (end_date or start_date).isoformat()
+        out_path = SCENARIO_SUMMARY_DIR / f"{args.symbol}_{start_date}_{end_str}.csv"
+
+    labels = {
+        1: "1",
+        2: "2",
+        3: "3",
+        4: "4",
+        5: "5",
+        6: "6",
+        7: "7 (A)",
+        8: "8 (B)",
+        9: "9 (C)",
+        10: "10 (D)",
+        11: "11 (E)",
+        12: "12 (F)",
+        13: "13 (G)",
+        14: "14 (H)",
+        15: "15 (I)",
+        16: "16 (J)",
+        17: "17 (K)",
+    }
+
+    fieldnames = [
+        "scenario",
+        "label",
+        "total_days",
+        "pct_of_total",
+        "days_above_overnight_mid",
+        "pct_above_overnight_mid",
+        "days_above_0609_low",
+        "pct_above_0609_low",
+        "days_above_18_09_low",
+        "pct_above_18_09_low",
+        "days_below_overnight_mid",
+        "pct_below_overnight_mid",
+        "days_below_0609_high",
+        "pct_below_0609_high",
+        "days_below_18_09_high",
+        "pct_below_18_09_high",
+        "days_new_high_09_1130",
+        "pct_new_high_09_1130",
+        "days_new_low_09_1130",
+        "pct_new_low_09_1130",
+    ]
+
+    if out_path is not None:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with out_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for s in SCENARIOS:
+                st = stats_by_scenario[s]
+                writer.writerow(
+                    {
+                        "scenario": st.scenario,
+                        "label": labels.get(s, str(s)),
+                        "total_days": st.total_days,
+                        "pct_of_total": f"{st.pct_of_total:.4f}",
+                        "days_above_overnight_mid": st.days_above_overnight_mid,
+                        "pct_above_overnight_mid": f"{st.pct_above_overnight_mid:.4f}",
+                        "days_above_0609_low": st.days_above_0609_low,
+                        "pct_above_0609_low": f"{st.pct_above_0609_low:.4f}",
+                        "days_above_18_09_low": st.days_above_18_09_low,
+                        "pct_above_18_09_low": f"{st.pct_above_18_09_low:.4f}",
+                        "days_below_overnight_mid": st.days_below_overnight_mid,
+                        "pct_below_overnight_mid": f"{st.pct_below_overnight_mid:.4f}",
+                        "days_below_0609_high": st.days_below_0609_high,
+                        "pct_below_0609_high": f"{st.pct_below_0609_high:.4f}",
+                        "days_below_18_09_high": st.days_below_18_09_high,
+                        "pct_below_18_09_high": f"{st.pct_below_18_09_high:.4f}",
+                        "days_new_high_09_1130": st.days_new_high_09_1130,
+                        "pct_new_high_09_1130": f"{st.pct_new_high_09_1130:.4f}",
+                        "days_new_low_09_1130": st.days_new_low_09_1130,
+                        "pct_new_low_09_1130": f"{st.pct_new_low_09_1130:.4f}",
+                    }
+                )
+        print(f"Wrote scenario summary to {out_path}")
+
     total_days = sum(stats_by_scenario[s].total_days for s in SCENARIOS)
     print("\nScenarios (06:00–09:00 ET):")
     print("  1–3 = bull; 4–6 = bear; 7=A, 8=B, 9=C, 10=D, 11=E; 12=F, 13=G, 14=H; 15=I, 16=J; 17=K inside")
