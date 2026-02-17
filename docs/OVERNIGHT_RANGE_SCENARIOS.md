@@ -127,21 +127,21 @@ Scenarios are **mutually exclusive**. Each day is assigned exactly one scenario 
 
 ## Scenarios 7–17 (Gap scenarios)
 
-Days that do not match 1–6 are classified into gap scenarios 7–17 (A–K). Full definitions and interpretation are in [docs/OVERNIGHT_SCENARIO_GAPS.md](docs/OVERNIGHT_SCENARIO_GAPS.md).
+Days that do not match 1–6 are classified into gap scenarios 7–17 (A–K). Each scenario is defined by two things: (1) where price went during 06:00–09:00 ET (did it break below the overnight low, above the overnight high, or stay inside?), and (2) where price **closed at 09:00 ET** relative to the overnight low, middle, and high. Below, “mid” means the overnight middle (halfway between overnight high and low).
 
-| Scenario | Id | One-line description |
-|----------|-----|------------------------|
-| 7 | A | Below low, close ≤ mid (failed recovery) |
-| 8 | B | Above low, close in (M, H] (recovery, no breakout) |
-| 9 | C | Above low, close ≤ mid (hold low then fade) |
-| 10 | D | Above mid, close < mid (gave back strength) |
-| 11 | E | Above mid, close in [M, H) (strong range, no breakout) |
-| 12 | F | Above high, close ≥ mid (spike then hold mid) |
-| 13 | G | Above high, close in [L, M) (spike then sell to mid) |
-| 14 | H | Above high, close < L (spike then collapse) |
-| 15 | I | Below high, close ≥ low (no breakdown) |
-| 16 | J | Below mid, close ≥ low (weak but hold low) |
-| 17 | K | Inside range (min ≥ L, max ≤ H, close in [L, H]) |
+| Scenario | Id | Plain-English description |
+|----------|-----|----------------------------|
+| 7 | A | Price traded **below the overnight low** at least once, and closed at 09:00 **at or below the overnight mid**. (Failed recovery: dipped below the range but never reclaimed the midpoint.) |
+| 8 | B | Price stayed **at or above the overnight low** (never broke below it), and closed at 09:00 **above the overnight mid but at or below the overnight high**. (Recovery without a breakout: held the low and closed in the upper half of the range, but did not close above the high.) |
+| 9 | C | Price stayed **at or above the overnight low**, and closed at 09:00 **at or below the overnight mid**. (Hold low then fade: respected the low but gave back gains and closed in the lower half by 09:00.) |
+| 10 | D | Price traded **at or above the overnight mid** at some point, but closed at 09:00 **below the overnight mid**. (Gave back strength: was above mid during the window but sold off and closed below mid.) |
+| 11 | E | Price stayed **at or above the overnight mid**, and closed at 09:00 **at or above the overnight mid but below the overnight high**. (Strong range, no breakout: stayed in the upper half and closed there, but did not close above the high.) |
+| 12 | F | Price traded **above the overnight high** at least once, and closed at 09:00 **at or above the overnight mid**. (Spike then hold mid: broke above the range then held above the midpoint by 09:00.) |
+| 13 | G | Price traded **above the overnight high** at least once, and closed at 09:00 **at or above the overnight low but below the overnight mid**. (Spike then sell to mid: broke above the range then sold off into the lower half by 09:00.) |
+| 14 | H | Price traded **above the overnight high** at least once, and closed at 09:00 **below the overnight low**. (Spike then collapse: broke above the range then reversed sharply and closed below the low.) |
+| 15 | I | Price never traded **above the overnight high**, and closed at 09:00 **at or above the overnight low**. (No breakdown: stayed below the high and held the low by 09:00.) |
+| 16 | J | Price never traded **above the overnight mid**, and closed at 09:00 **at or above the overnight low**. (Weak but hold low: stayed in the lower half of the range and closed at or above the low.) |
+| 17 | K | Price **never went below the overnight low or above the overnight high** during 06:00–09:00, and closed at 09:00 **somewhere between the overnight low and high**. (Inside range: the entire 06–09 action and the 09:00 close stayed within the overnight range.) |
 
 **Outcome metrics:** Bull-type (1–3, 7–11) report above_mid, above_0609_low, above_18_09_low for 09:00–16:00 and **new_high_09_1130** (% of days a new high was made 09:00–11:30). Bear-type (4–6, 12–16) report below_mid, below_0609_high, below_18_09_high and **new_low_09_1130** (% of days a new low was made 09:00–11:30). Scenario 17 (K) reports both sets.
 
